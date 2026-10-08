@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>دليل المصانع - بيانات الاتصال المعتمدة</title>
+  <!-- SheetJS for local Excel parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-light: #3b82f6;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --accent-email: #0284c7;
+      --accent-phone: #059669;
+      --accent-admin: #d97706;
+      --badge-empty: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      padding: 24px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: var(--surface);
+      padding: 28px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      margin-bottom: 24px;
+    }
+
+    .header-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .stats-badge {
+      background: #eff6ff;
+      color: var(--primary-light);
+      padding: 6px 16px;
+      border-radius: 9999px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border: 1px solid #bfdbfe;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .controls {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .search-box {
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 12px 18px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 1rem;
+      outline: none;
+      transition: all 0.2s ease;
+      background: #fdfdfd;
+    }
+
+    .search-input:focus {
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+      background: #fff;
+    }
+
+    .file-upload-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--primary);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    .file-upload-btn:hover {
+      background: #172554;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-index {
+      background: #f1f5f9;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-main);
+      flex: 1;
+    }
+
+    .info-group {
+      margin-bottom: 12px;
+    }
+
+    .info-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .links-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .contact-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-decoration: none;
+      direction: ltr;
+      unicode-bidi: isolate;
+      transition: filter 0.15s ease;
+    }
+
+    .contact-link:hover {
+      filter: brightness(0.92);
+    }
+
+    .link-email {
+      background: #e0f2fe;
+      color: var(--accent-email);
+      border: 1px solid #bae6fd;
+    }
+
+    .link-factory-phone {
+      background: #dcfce7;
+      color: var(--accent-phone);
+      border: 1px solid #bbf7d0;
+    }
+
+    .link-admin-phone {
+      background: #fef3c7;
+      color: var(--accent-admin);
+      border: 1px solid #fde68a;
+    }
+
+    .not-available {
+      color: var(--badge-empty);
+      font-size: 0.85rem;
+      font-style: italic;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      background: var(--surface);
+      border-radius: 12px;
+      border: 1px dashed var(--border);
+      grid-column: 1 / -1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="header-title">
+        <div>
+          <h1>دليل المصانع والشركات الصناعية</h1>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">
+            بيانات الاتصال المستخلصة حصراً (اسم المصنع، البريد الإلكتروني، هاتف المصنع، هاتف الإدارة)
+          </p>
+        </div>
+        <div id="stats" class="stats-badge">جاري تجهيز السجلات...</div>
+      </div>
+
+      <div class="controls">
+        <div class="search-box">
+          <input 
+            type="text" 
+            id="searchInput" 
+            class="search-input" 
+            placeholder="بحث فوري باسم المصنع، البريد الإلكتروني، أو رقم الهاتف..."
+          />
+        </div>
+        <div>
+          <label class="file-upload-btn">
+            <span>تحميل ملف مصانع .xls</span>
+            <input type="file" id="excelFileInput" accept=".xls,.xlsx" />
+          </label>
+        </div>
+      </div>
+    </header>
+
+    <main id="factoriesGrid" class="grid"></main>
+  </div>
+
+  <script>
+    // Global factory repository
+    let factoriesData = [];
+
+    // Helper: Split raw string containing multiple contacts and format for dialing
+    function parseContactEntries(rawString) {
+      if (!rawString || typeof rawString !== 'string') return [];
+      
+      // Clean Arabic line annotations like (5خطوط) or (10خطوط)
+      let cleaned = rawString.replace(/\([^)]*خطوط[^)]*\)/g, '').trim();
+
+      // Split on delimiters common in directory files: commas, slashes, semicolons, multiple dashes
+      let parts = cleaned.split(/[\/,;\n\r]+/).map(p => p.trim()).filter(Boolean);
+
+      // Further split space or dash-separated numbers while preserving area codes like (02), (015), (048)
+      let results = [];
+      parts.forEach(part => {
+        // If it's an email string containing spaces
+        if (part.includes('@')) {
+          let emailSubParts = part.split(/[\s-]+/).filter(s => s.includes('@'));
+          results.push(...emailSubParts);
+        } else {
+          // If numbers are joined by dashes with single area code: e.g. 368821-381963(015)
+          let areaCodeMatch = part.match(/\((0\d+)\)$/);
+          let areaCode = areaCodeMatch ? areaCodeMatch[0] : '';
+          let baseNumbers = part.replace(/\((0\d+)\)$/, '').split('-').map(n => n.trim()).filter(Boolean);
+
+          if (baseNumbers.length > 1 && areaCode) {
+            baseNumbers.forEach(num => results.push(`${num}${areaCode}`));
+          } else {
+            results.push(part);
+          }
+        }
+      });
+
+      return results;
+    }
+
+    // Clean phone number for tel: URI
+    function sanitizeForTel(phoneStr) {
+      // Extract area code if present: e.g., 8335600(02) -> 028335600
+      let match = phoneStr.match(/(.+?)\((0\d+)\)/);
+      if (match) {
+        let number = match[1].replace(/\D/g, '');
+        let code = match[2];
+        return `+20${code.replace(/^0/, '')}${number}`;
+      }
+      return phoneStr.replace(/[^0-9+]/g, '');
+    }
+
+    // Render factories cards into the DOM
+    function renderFactories(items) {
+      const container = document.getElementById('factoriesGrid');
+      const statsBadge = document.getElementById('stats');
+      
+      statsBadge.textContent = `إجمالي المصانع المعروضة: ${items.length} من أصل ${factoriesData.length}`;
+
+      if (items.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <h3>لا توجد مصانع مطابقة لبحثك</h3>
+            <p>تأكد من صحة الكلمات المدخلة أو أعد ضبط معايير البحث.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = items.map((f, idx) => {
+        const emailsHtml = f.emails.length > 0
+          ? f.emails.map(e => `<a href="mailto:${e}" class="contact-link link-email" title="إرسال بريد">${e}</a>`).join('')
+          : '<span class="not-available">Not Available</span>';
+
+        const factoryPhonesHtml = f.factoryPhones.length > 0
+          ? f.factoryPhones.map(p => `<a href="tel:${sanitizeForTel(p)}" class="contact-link link-factory-phone" title="اتصال هاتفي">${p}</a>`).join('')
+          : '<span class="not-available">Not Available</span>';
+
+        const adminPhonesHtml = f.adminPhones.length > 0
+          ? f.adminPhones.map(p => `<a href="tel:${sanitizeForTel(p)}" class="contact-link link-admin-phone" title="اتصال هاتفي">${p}</a>`).join('')
+          : '<span class="not-available">Not Available</span>';
+
+        return `
+          <article class="card">
+            <div>
+              <div class="card-header">
+                <span class="card-index">#${f.originalIndex}</span>
+                <h2 class="card-title">${f.name}</h2>
+              </div>
+
+              <div class="info-group">
+                <span class="info-label">البريد الإلكتروني / Email</span>
+                <div class="links-list">${emailsHtml}</div>
+              </div>
+
+              <div class="info-group">
+                <span class="info-label">هاتف المصنع / Factory Phone</span>
+                <div class="links-list">${factoryPhonesHtml}</div>
+              </div>
+
+              <div class="info-group">
+                <span class="info-label">هاتف الإدارة / Management Phone</span>
+                <div class="links-list">${adminPhonesHtml}</div>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    // Instant Search Implementation
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const query = e.target.value.trim().toLowerCase();
+      if (!query) {
+        renderFactories(factoriesData);
+        return;
+      }
+
+      const filtered = factoriesData.filter(f => {
+        const nameMatch = f.name.toLowerCase().includes(query);
+        const emailMatch = f.emails.some(em => em.toLowerCase().includes(query));
+        const factoryPhoneMatch = f.factoryPhones.some(p => p.includes(query));
+        const adminPhoneMatch = f.adminPhones.some(p => p.includes(query));
+        return nameMatch || emailMatch || factoryPhoneMatch || adminPhoneMatch;
+      });
+
+      renderFactories(filtered);
+    });
+
+    // Parse Excel File on User Upload
+    document.getElementById('excelFileInput').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const data = new Uint8Array(evt.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        
+        // Read the primary sheet: "الصناعات الغذائية" or sheet 0
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+        // Row 0 is header, rows 1 to N are factories
+        const header = json[0] || [];
+        const nameIdx = header.indexOf('أسم_الشركة');
+        const emailIdx = header.indexOf('E-mail');
+        const facPhoneIdx = header.indexOf('تليفون المصنع');
+        const admPhoneIdx = header.indexOf('تليفون الإدارة');
+
+        factoriesData = [];
+
+        for (let i = 1; i < json.length; i++) {
+          const row = json[i];
+          if (!row || row.length === 0 || !row[nameIdx]) continue;
+
+          const rawName = String(row[nameIdx] || '').trim();
+          const rawEmail = String(row[emailIdx] || '').trim();
+          const rawFacPhone = String(row[facPhoneIdx] || '').trim();
+          const rawAdmPhone = String(row[admPhoneIdx] || '').trim();
+
+          factoriesData.push({
+            originalIndex: i,
+            name: rawName,
+            emails: parseContactEntries(rawEmail),
+            factoryPhones: parseContactEntries(rawFacPhone),
+            adminPhones: parseContactEntries(rawAdmPhone)
+          });
+        }
+
+        renderFactories(factoriesData);
+      };
+      reader.readAsArrayBuffer(file);
+    });
+
+    // Automatically attempt to fetch and parse the file if hosted on server
+    window.addEventListener('DOMContentLoaded', () => {
+      fetch('مصانع .xls')
+        .then(res => {
+          if (!res.ok) throw new Error('File not accessible via direct fetch');
+          return res.arrayBuffer();
+        })
+        .then(buffer => {
+          const workbook = XLSX.read(new Uint8Array(buffer), { type: 'array' });
+          const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+          const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+          const header = json[0] || [];
+          const nameIdx = header.indexOf('أسم_الشركة');
+          const emailIdx = header.indexOf('E-mail');
+          const facPhoneIdx = header.indexOf('تليفون المصنع');
+          const admPhoneIdx = header.indexOf('تليفون الإدارة');
+
+          factoriesData = [];
+          for (let i = 1; i < json.length; i++) {
+            const row = json[i];
+            if (!row || !row[nameIdx]) continue;
+
+            factoriesData.push({
+              originalIndex: i,
+              name: String(row[nameIdx]).trim(),
+              emails: parseContactEntries(String(row[emailIdx] || '')),
+              factoryPhones: parseContactEntries(String(row[facPhoneIdx] || '')),
+              adminPhones: parseContactEntries(String(row[admPhoneIdx] || ''))
+            });
+          }
+          renderFactories(factoriesData);
+        })
+        .catch(() => {
+          // Fallback initial dataset if local file protocol blocks automated fetch
+          document.getElementById('stats').textContent = 'يرجى اختيار ملف "مصانع .xls" عبر الزر أعلاه لعرض السجلات فوراً.';
+        });
+    });
+  </script>
+</body>
+</html>
